@@ -27,9 +27,8 @@ app.use(
 );
 app.use(express.static("public"));
 
-// توجيه الصفحة الرئيسية
 app.get("/", (req, res) => {
-  res.redirect("/auth/index"); // توجيه إلى /auth/index
+  res.redirect("index.html");
 });
 
 // مسار الرسائل
