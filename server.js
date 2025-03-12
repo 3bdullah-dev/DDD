@@ -4,7 +4,7 @@ const session = require("express-session");
 const dotenv = require("dotenv");
 const authRoutes = require("./routes/auth");
 const messageRoutes = require("./routes/messages");
-const User = require("./models/user");
+const User = require("./models/user"); // <-- أضف هذا السطر
 
 dotenv.config();
 const app = express();
@@ -27,46 +27,55 @@ app.use(
 );
 app.use(express.static("public"));
 
+
+
 // توجيه الصفحة الرئيسية إلى تسجيل الدخول
 app.get("/", (req, res) => {
-  res.redirect("/login.html"); // تغيير من /auth/index إلى /login.html
+  res.redirect("/auth/index");
 });
 
 // مسار الرسائل (JSON)
+// مسار الحصول على الرسائل
 app.get("/index/messages", async (req, res) => {
   if (!req.session.userId) {
     return res.status(401).json({ error: "غير مسموح" });
   }
+
   try {
     const user = await User.findById(req.session.userId);
-    const sortedMessages = user.messages.sort((a, b) => b.timestamp - a.timestamp);
+    // ترتيب الرسائل من الأحدث إلى الأقدم
+    const sortedMessages = user.messages.sort(
+      (a, b) => b.timestamp - a.timestamp
+    );
     res.json(sortedMessages);
   } catch (error) {
     res.status(500).json({ error: "حدث خطأ في تحميل الرسائل" });
   }
 });
 
-// مسار الملف الشخصي
+// مسار الملف الشخصي <-- ضعه قبل التوجيهات الأخرى
 app.get("/profile", async (req, res) => {
   if (!req.session.userId) {
-    return res.redirect("/login.html"); // تغيير من /auth/index إلى /login.html
+    return res.redirect("/auth/index");
   }
+
   try {
     const user = await User.findById(req.session.userId);
     if (!user) {
       return res.redirect("/auth/logout");
     }
-    res.redirect("/profile.html"); // استخدام redirect بدلاً من sendFile لتجنب مشاكل Serverless
+    res.sendFile("profile.html", { root: "public" });
   } catch (error) {
     res.status(500).send("حدث خطأ");
   }
 });
 
-// مسار API للحصول على بيانات المستخدم
+// أضف هذا المسار قبل التوجيهات الأخرى
 app.get("/api/user", async (req, res) => {
   if (!req.session.userId) {
     return res.status(401).send("غير مسجل دخول");
   }
+
   try {
     const user = await User.findById(req.session.userId);
     res.json({ _id: user._id, name: user.name, email: user.email });
@@ -75,12 +84,12 @@ app.get("/api/user", async (req, res) => {
   }
 });
 
-// مسار API للحصول على اسم المستخدم
+// أضف مسارًا جديدًا للحصول على اسم المستخدم
 app.get("/api/user/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "المستخدم غير موجود" });
-    res.json({ name: user.name });
+    res.json({ name: user.name }); // إرسال الاسم فقط
   } catch (error) {
     res.status(500).json({ error: "حدث خطأ" });
   }
@@ -90,5 +99,5 @@ app.get("/api/user/:id", async (req, res) => {
 app.use("/auth", authRoutes);
 app.use("/messages", messageRoutes);
 
-// تصدير التطبيق كوظيفة Serverless
-module.exports = app;
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
