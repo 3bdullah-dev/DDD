@@ -26,10 +26,11 @@ app.use(
   })
 );
 app.use(express.static("public"));
-
+// توجيه الصفحة الرئيسية إلى تسجيل الدخول
 app.get("/", (req, res) => {
-  res.redirect("index");
+  res.redirect("/auth/index");
 });
+
 
 // مسار الرسائل
 app.get("/index/messages", async (req, res) => {
