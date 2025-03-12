@@ -26,13 +26,13 @@ app.use(
   })
 );
 app.use(express.static("public"));
+
 // توجيه الصفحة الرئيسية إلى تسجيل الدخول
 app.get("/", (req, res) => {
-  res.redirect("/auth/index");
+  res.redirect("/login.html"); // تغيير من /auth/index إلى /login.html
 });
 
-
-// مسار الرسائل
+// مسار الرسائل (JSON)
 app.get("/index/messages", async (req, res) => {
   if (!req.session.userId) {
     return res.status(401).json({ error: "غير مسموح" });
@@ -49,14 +49,14 @@ app.get("/index/messages", async (req, res) => {
 // مسار الملف الشخصي
 app.get("/profile", async (req, res) => {
   if (!req.session.userId) {
-    return res.redirect("/auth/index");
+    return res.redirect("/login.html"); // تغيير من /auth/index إلى /login.html
   }
   try {
     const user = await User.findById(req.session.userId);
     if (!user) {
       return res.redirect("/auth/logout");
     }
-    res.redirect("/profile.html"); // توجيه إلى ملف ثابت
+    res.redirect("/profile.html"); // استخدام redirect بدلاً من sendFile لتجنب مشاكل Serverless
   } catch (error) {
     res.status(500).send("حدث خطأ");
   }
