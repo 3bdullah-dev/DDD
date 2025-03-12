@@ -29,7 +29,7 @@ app.use(express.static("public"));
 
 // توجيه الصفحة الرئيسية
 app.get("/", (req, res) => {
-  res.redirect("/auth/index");
+  res.redirect("/auth/index"); // توجيه إلى /auth/index
 });
 
 // مسار الرسائل
@@ -91,4 +91,4 @@ app.use("/auth", authRoutes);
 app.use("/messages", messageRoutes);
 
 // تصدير التطبيق كوظيفة Serverless
-module.exports = app; // Vercel يتعامل مع التصدير تلقائيًا
+module.exports = app;
